@@ -1,0 +1,21 @@
+manifest:
+  remotes:
+    - name: zmkfirmware
+      url-base: https://github.com/zmkfirmware
+    - name: cannonkeys
+      url-base: https://github.com/cannonkeys
+  projects:
+    # Upstream ZMK 0.3 release branch (Zephyr 3.5), pinned to a commit.
+    # Replaces CannonKeys' awkannan/zmk fork, whose only extras (&sleep behavior,
+    # smart-rgbled hooks) the Link does not use.
+    - name: zmk
+      remote: zmkfirmware
+      revision: acfd8e5ea76cf23ad1c9b6b99848f97a95224257 # v0.3-branch
+      import: app/west.yml
+    # Board definitions (link_left / link_right). Provides zephyr/module.yml,
+    # so west picks it up as a Zephyr module automatically.
+    - name: zmk-cannonkeys-keyboards
+      remote: cannonkeys
+      revision: 0b6f02193686573e78a7cb1d6fd768bcf53241d0 # main
+  self:
+    path: config

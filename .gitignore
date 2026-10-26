@@ -1,0 +1,10 @@
+# west workspace (populated by `west init -l config && west update`)
+.west/
+bootloader/
+modules/
+tools/
+zephyr/
+zmk/
+zmk-cannonkeys-keyboards/
+build/
+artifacts/

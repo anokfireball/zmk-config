@@ -1,0 +1,117 @@
+name: Build ZMK firmware
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matrix:
+    name: Read build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      build_matrix: ${{ steps.fetch.outputs.build_matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - id: fetch
+        run: echo "build_matrix=$(yq -oj -I0 . build.yaml)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.artifact-name }}
+    needs: matrix
+    runs-on: ubuntu-latest
+    # CannonKeys' Link boards target Zephyr 3.5 (ZMK v0.3). The
+    # `stable` image moved to Zephyr 4.x and cannot build them anymore.
+    container:
+      image: zmkfirmware/zmk-build-arm:3.5-branch@sha256:840526f03c19c286b614d5cb97b11242ae19e468fc2ef2f095f6cf0465fa1c5b
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.matrix.outputs.build_matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Cache west modules
+        uses: actions/cache@v6
+        continue-on-error: true
+        with:
+          path: |
+            modules/
+            tools/
+            zephyr/
+            bootloader/
+            zmk/
+            zmk-cannonkeys-keyboards/
+          key: west-${{ hashFiles('config/west.yml') }}
+
+      - name: West init / update
+        run: |
+          west init -l config
+          west update --fetch-opt=--filter=tree:0
+          west zephyr-export
+
+      - name: West build
+        env:
+          BOARD: ${{ matrix.board }}
+          SHIELD: ${{ matrix.shield }}
+          SNIPPET: ${{ matrix.snippet }}
+          CMAKE_ARGS: ${{ matrix.cmake-args }}
+        run: |
+          west build -s zmk/app -d build -b "$BOARD" ${SNIPPET:+-S "$SNIPPET"} -- \
+            -DZMK_CONFIG="$GITHUB_WORKSPACE/config" \
+            ${SHIELD:+-DSHIELD="$SHIELD"} \
+            $CMAKE_ARGS
+
+      - name: Stage firmware
+        run: |
+          mkdir -p artifacts
+          cp build/zephyr/zmk.uf2 "artifacts/${{ matrix.artifact-name }}.uf2"
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: artifact-${{ matrix.artifact-name }}
+          path: artifacts/*
+
+  release:
+    name: Publish GitHub release
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: artifact-*
+          path: release
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: release
+        run: sha256sum ./*.uf2 | sed 's|\./||' > checksums.txt
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="firmware-$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::8}"
+          {
+            echo "Built from config commit [${GITHUB_SHA::8}](https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})."
+            echo
+            echo "Flash \`link_left.uf2\` to the left (central) half and \`link_right.uf2\` to the right half."
+            echo "Keymap-only changes only need the left half."
+          } > release-notes.md
+          gh release create "$tag" release/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Link firmware (${GITHUB_SHA::8})" \
+            --notes-file release-notes.md
