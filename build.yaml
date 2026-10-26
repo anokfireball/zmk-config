@@ -1,0 +1,13 @@
+# Build matrix, consumed by .github/workflows/build.yml.
+# Same targets as CannonKeys' official Link firmware (ZMK Studio on the
+# central/left half, nice!view on both).
+---
+include:
+  - board: link_left
+    shield: nice_view
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    artifact-name: link_left
+  - board: link_right
+    shield: nice_view
+    artifact-name: link_right

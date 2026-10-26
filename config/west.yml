@@ -1,0 +1,21 @@
+manifest:
+  remotes:
+    - name: awkannan
+      url-base: https://github.com/awkannan
+    - name: cannonkeys
+      url-base: https://github.com/cannonkeys
+  projects:
+    # CannonKeys builds the Link on awkannan's ZMK fork (v0.2.x + sleep/LED
+    # hooks, Zephyr 3.5). Mirrors zmk-cannonkeys-keyboards/config/west.yml,
+    # but pinned to a commit instead of a branch.
+    - name: zmk
+      remote: awkannan
+      revision: 312e4b0a056bcea9615d1355e84a5d1b2927f6ba # develop
+      import: app/west.yml
+    # Board definitions (link_left / link_right). Provides zephyr/module.yml,
+    # so west picks it up as a Zephyr module automatically.
+    - name: zmk-cannonkeys-keyboards
+      remote: cannonkeys
+      revision: 0b6f02193686573e78a7cb1d6fd768bcf53241d0 # main
+  self:
+    path: config
