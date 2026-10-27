@@ -1,4 +1,46 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"]
+  "extends": ["config:best-practices"],
+  "packageRules": [
+    {
+      "description": "Build container must match the Zephyr version of the pinned ZMK (3.5 for v0.3-branch). Digest refreshes only; tag moves to 4.x are a deliberate migration.",
+      "matchPackageNames": ["zmkfirmware/zmk-build-arm"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "description": "Branch-pinned west projects are bumped by commit, so Renovate finds no release notes. Link the commit comparison in the PR body instead.",
+      "matchDatasources": ["git-refs"],
+      "prBodyNotes": ["Commits: https://github.com/{{{depName}}}/compare/{{{currentDigest}}}...{{{newDigest}}}"]
+    },
+    {
+      "description": "Digest refreshes of the floating 3.5-branch tag are rebuilds of zmk-docker's 3.5-branch (base image and package updates), so there are no release notes. Link that branch's history instead.",
+      "matchPackageNames": ["zmkfirmware/zmk-build-arm"],
+      "prBodyNotes": ["Image source history: https://github.com/zmkfirmware/zmk-docker/commits/3.5-branch"]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "ZMK pin in config/west.yml (release branch head)",
+      "managerFilePatterns": ["/^config/west\\.yml$/"],
+      "matchStrings": [
+        "- name: zmk\\n\\s+remote: zmkfirmware\\n\\s+revision: (?<currentDigest>[a-f0-9]{40}) # (?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "zmkfirmware/zmk",
+      "packageNameTemplate": "https://github.com/zmkfirmware/zmk",
+      "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "description": "CannonKeys board module pin in config/west.yml",
+      "managerFilePatterns": ["/^config/west\\.yml$/"],
+      "matchStrings": [
+        "- name: zmk-cannonkeys-keyboards\\n\\s+remote: cannonkeys\\n\\s+revision: (?<currentDigest>[a-f0-9]{40}) # (?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "cannonkeys/zmk-cannonkeys-keyboards",
+      "packageNameTemplate": "https://github.com/cannonkeys/zmk-cannonkeys-keyboards",
+      "datasourceTemplate": "git-refs"
+    }
+  ]
 }

@@ -7,9 +7,11 @@ Keymap and build configuration for the Link, built against
 
 - **Firmware source**: `config/west.yml` pins CannonKeys' board module and upstream ZMK
   (`v0.3-branch`, Zephyr 3.5) to exact commits.
-- **Builds**: GitHub Actions builds `build.yaml` on every push to `main` inside the
-  `zmk-build-arm:3.5-branch` container (the `stable` image is Zephyr 4.x and cannot build these boards)
-  and publishes `link_left.uf2`, `link_right.uf2` and `checksums.txt` as a GitHub release.
+- **Builds**: GitHub Actions builds `build.yaml` on every push to `main` and on every pull request inside the
+  `zmk-build-arm:3.5-branch` container (the `stable` image is Zephyr 4.x and cannot build these boards).
+  Pushes to `main` publish `link_left.uf2`, `link_right.uf2` and `checksums.txt` as a GitHub release,
+  unless the firmware checksums match the latest release.
+- **Updates**: Renovate tracks the GitHub Actions, the build image digest, and both `west.yml` pins.
 - **Keymap**: `config/link.keymap` overrides the board's default keymap.
 
 ## Resetting / entering the bootloader
