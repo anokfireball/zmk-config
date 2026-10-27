@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:best-practices"],
+  "fetchChangeLogs": "pr",
   "packageRules": [
     {
       "description": "Build container must match the Zephyr version of the pinned ZMK (3.5 for v0.3-branch). Digest refreshes only; tag moves to 4.x are a deliberate migration.",
@@ -22,22 +23,24 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "ZMK pin in config/west.yml (release branch head)",
+      "description": "ZMK pin in config/west.yml. Captures only the commit SHA; the branch name is a literal so Renovate tracks the branch head.",
       "managerFilePatterns": ["/^config/west\\.yml$/"],
       "matchStrings": [
-        "- name: zmk\\n\\s+remote: zmkfirmware\\n\\s+revision: (?<currentDigest>[a-f0-9]{40}) # (?<currentValue>\\S+)"
+        "- name: zmk\\n\\s+remote: zmkfirmware\\n\\s+revision: (?<currentDigest>[a-f0-9]{40})"
       ],
+      "currentValueTemplate": "v0.3-branch",
       "depNameTemplate": "zmkfirmware/zmk",
       "packageNameTemplate": "https://github.com/zmkfirmware/zmk",
       "datasourceTemplate": "git-refs"
     },
     {
       "customType": "regex",
-      "description": "CannonKeys board module pin in config/west.yml",
+      "description": "CannonKeys board module pin in config/west.yml. Captures only the commit SHA; the branch name is a literal so Renovate tracks the branch head.",
       "managerFilePatterns": ["/^config/west\\.yml$/"],
       "matchStrings": [
-        "- name: zmk-cannonkeys-keyboards\\n\\s+remote: cannonkeys\\n\\s+revision: (?<currentDigest>[a-f0-9]{40}) # (?<currentValue>\\S+)"
+        "- name: zmk-cannonkeys-keyboards\\n\\s+remote: cannonkeys\\n\\s+revision: (?<currentDigest>[a-f0-9]{40})"
       ],
+      "currentValueTemplate": "main",
       "depNameTemplate": "cannonkeys/zmk-cannonkeys-keyboards",
       "packageNameTemplate": "https://github.com/cannonkeys/zmk-cannonkeys-keyboards",
       "datasourceTemplate": "git-refs"
