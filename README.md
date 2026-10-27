@@ -78,6 +78,28 @@ the left (central) half and `link_right.uf2` for the right half. Keymap-only cha
 > in flash and override the keymap compiled from this repo. Use "Restore Stock Keymap" in Studio
 > after flashing if the keymap does not change.
 
+## Maintaining keymap alignment
+
+Edit the bindings in `config/link.keymap`, then regenerate the art and spacing:
+
+```sh
+python3 scripts/format_keymap.py
+python3 scripts/format_keymap.py --check
+```
+
+Both use one grid: 13-character cells, centered content, and **6, 6, 6, 7, 5 keys per
+half**. Commas between `<binding>` groups sit at the art's right-hand pipe positions.
+The board's horizontal coordinates are rounded to whole-key slots so small physical
+gaps do not become empty key boxes. Vertical column stagger is flattened into five
+logical rows; the thumb-row inset and central gap remain.
+
+Binding text is limited to 11 characters, excluding `<` and `>`. For longer expressions,
+define an object-like `LINK_*` alias of at most 11 characters beside the existing aliases
+and use it inside `<...>` in the bindings. Each alias must expand to one complete binding.
+Labels come from the expanded bindings; new behaviors or keycodes may need a label rule
+in the formatter. Do not edit generated art by hand. `--check` exits 1 for formatting drift
+without changing the file.
+
 ## Build locally
 
 ```sh
