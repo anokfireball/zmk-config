@@ -27,7 +27,7 @@ jobs:
     name: Build ${{ matrix.artifact-name }}
     needs: matrix
     runs-on: ubuntu-latest
-    # CannonKeys' Link boards target Zephyr 3.5 (awkannan's ZMK fork). The
+    # CannonKeys' Link boards target Zephyr 3.5 (ZMK v0.3). The
     # `stable` image moved to Zephyr 4.x and cannot build them anymore.
     container:
       image: zmkfirmware/zmk-build-arm:3.5-branch@sha256:840526f03c19c286b614d5cb97b11242ae19e468fc2ef2f095f6cf0465fa1c5b

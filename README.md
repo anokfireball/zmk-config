@@ -5,8 +5,8 @@ Keymap and build configuration for the Link, built against
 
 ## How it works
 
-- **Firmware source**: `config/west.yml` pins CannonKeys' board module and the ZMK fork they build on
-  (`awkannan/zmk`, Zephyr 3.5) to exact commits.
+- **Firmware source**: `config/west.yml` pins CannonKeys' board module and upstream ZMK
+  (`v0.3-branch`, Zephyr 3.5) to exact commits.
 - **Builds**: GitHub Actions builds `build.yaml` on every push to `main` inside the
   `zmk-build-arm:3.5-branch` container (the `stable` image is Zephyr 4.x and cannot build these boards)
   and publishes `link_left.uf2`, `link_right.uf2` and `checksums.txt` as a GitHub release.
