@@ -26,6 +26,16 @@
 #define LINK_BT4 &bt BT_SEL 3
 #define LINK_BT5 &bt BT_SEL 4
 
+// Caps Word as close to the QMK boards as stock ZMK v0.3 allows. Letters are shifted;
+// digits, Backspace, Delete and minus keep it on, with or without either Shift, so
+// `_` (Shift + minus) continues as on QMK. Any other key ends it.
+// Not reproducible without a ZMK fork: QMK shifts a plain `-` to `_`
+// (and CAPS_WORD_INVERT_ON_SHIFT unshifts letters and `-`), ends Caps Word on
+// Ctrl/Alt/GUI chords and after 5 s idle.
+&caps_word {
+    continue-list = <MINUS BACKSPACE DELETE>;
+};
+
 / {
     behaviors {
         // QMK MEGA: tap = right Cmd, hold = Ctrl+Alt+Cmd. Param order matches
@@ -50,6 +60,18 @@
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings = <&kp LC(LG(Q))>;
+        };
+    };
+
+    combos {
+        compatible = "zmk,combos";
+
+        // Both Shifts together turn on Caps Word (QMK: BOTH_SHIFTS_TURNS_ON_CAPS_WORD).
+        combo_caps_word {
+            bindings = <&caps_word>;
+            key-positions = <36 49>;
+            timeout-ms = <30>;
+            require-prior-idle-ms = <150>;
         };
     };
 
