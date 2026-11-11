@@ -49,8 +49,10 @@
 #define LINK_BT4 &bt BT_SEL 3
 #define LINK_BT5 &bt BT_SEL 4
 
-// Home row mods. Shared by MAC and WIN where the modifier is the same (S, D, K, L);
-// otherwise _M is MAC (Mac order) and _W is WIN.
+// Home row mods and the Esc key on the Caps Lock position. Shared by MAC and WIN where the
+// modifier is the same (S, D, K, L); otherwise _M is MAC (Mac order) and _W is WIN.
+#define LINK_ESC_M &mt LGUI ESC
+#define LINK_ESC_W &mt LCTRL ESC
 #define LINK_A_M &hm_l_pinky LCTRL A
 #define LINK_A_W &hm_l_pinky LGUI A
 #define LINK_S &hm_l_ring LALT S
@@ -187,18 +189,19 @@
 
         // Default layer. Mac modifier order: Ctrl, Option, Cmd on the left thumbs, mirrored on
         // the right, where the innermost key is MEGA (tap = right Cmd, hold = Ctrl+Option+Cmd).
-        // Home row mods: Ctrl, Option, Shift, Cmd | Cmd, Shift, Option, Ctrl.
+        // Home row mods: Ctrl, Option, Shift, Cmd | Cmd, Shift, Option, Ctrl. Esc on tap,
+        // Cmd on hold left of A.
         mac_layer {
             display-name = "MAC";
 // |      `      |      1      |      2      |      3      |      4      |      5      |                                                                     |      6      |      7      |      8      |      9      |      0      |      -      |
 // |     TAB     |      Q      |      W      |      E      |      R      |      T      |                                                                     |      Y      |      U      |      I      |      O      |      P      |    BKSPC    |
-// |     ESC     |   A/LCTL    |    S/ALT    |   D/SHIFT   |   F/LGUI    |      G      |                                                                     |      H      |   J/LGUI    |   K/SHIFT   |    L/ALT    |   ;/LCTL    |      '      |
+// |  ESC/LGUI   |   A/LCTL    |    S/ALT    |   D/SHIFT   |   F/LGUI    |      G      |                                                                     |      H      |   J/LGUI    |   K/SHIFT   |    L/ALT    |   ;/LCTL    |      '      |
 // |    SHIFT    |      Z      |      X      |      C      |      V      |      B      |    MUTE     |                                         |    PLAY     |      N      |      M      |      ,      |      .      |      /      |    SHIFT    |
 //                             |    LCTL     |     ALT     |    LGUI     |    LOWER    |    ENTER    |                                         |    SPACE    |    RAISE    |    MEGA     |    RALT     |    RCTL     |
             bindings =
      <&kp GRAVE> ,  <&kp N1>   ,  <&kp N2>   ,  <&kp N3>   ,  <&kp N4>   ,  <&kp N5>   ,                                                                        <&kp N6>   ,  <&kp N7>   ,  <&kp N8>   ,  <&kp N9>   ,  <&kp N0>   , <&kp MINUS> ,
       <&kp TAB>  ,   <&kp Q>   ,   <&kp W>   ,   <&kp E>   ,   <&kp R>   ,   <&kp T>   ,                                                                         <&kp Y>   ,   <&kp U>   ,   <&kp I>   ,   <&kp O>   ,   <&kp P>   , <&kp BSPC>  ,
-      <&kp ESC>  , <LINK_A_M>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_M>  ,   <&kp G>   ,                                                                         <&kp H>   , <LINK_J_M>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_M> , <&kp APOS>  ,
+    <LINK_ESC_M> , <LINK_A_M>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_M>  ,   <&kp G>   ,                                                                         <&kp H>   , <LINK_J_M>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_M> , <&kp APOS>  ,
      <&kp LSHFT> ,   <&kp Z>   ,   <&kp X>   ,   <&kp C>   ,   <&kp V>   ,   <&kp B>   ,<&kp C_MUTE> ,                                           <&kp C_PP>  ,   <&kp N>   ,   <&kp M>   , <&kp COMMA> ,  <&kp DOT>  , <&kp FSLH>  , <&kp RSHFT> ,
                                  <&kp LCTRL> , <&kp LALT>  , <&kp LGUI>  ,<&mo L_LOWER>,  <&kp RET>  ,                                           <&kp SPACE> ,<&mo L_RAISE>, <LINK_MEGA> , <&kp RALT>  , <&kp RCTRL> ;
 
@@ -207,18 +210,19 @@
 
         // Toggled on top of MAC for Windows/Linux. Only OS-dependent keys are overridden:
         // GUI outermost, Ctrl innermost on the thumbs; home row mods in Windows order (GUI,
-        // Alt, Shift, Ctrl | Ctrl, Shift, Alt, GUI). Everything else falls through to MAC.
+        // Alt, Shift, Ctrl | Ctrl, Shift, Alt, GUI); Esc/Ctrl left of A. Everything else falls
+        // through to MAC.
         win_layer {
             display-name = "WIN";
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
-// |             |   A/LGUI    |             |             |   F/LCTL    |             |                                                                     |             |   J/LCTL    |             |             |   ;/LGUI    |             |
+// |  ESC/LCTL   |   A/LGUI    |             |             |   F/LCTL    |             |                                                                     |             |   J/LCTL    |             |             |   ;/LGUI    |             |
 // |             |             |             |             |             |             |             |                                         |             |             |             |             |             |             |             |
 //                             |    LGUI     |             |    LCTL     |             |             |                                         |             |             |    RCTL     |             |    RGUI     |
             bindings =
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-      <&trans>   , <LINK_A_W>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_W>  ,  <&trans>   ,                                                                        <&trans>   , <LINK_J_W>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_W> ,  <&trans>   ,
+    <LINK_ESC_W> , <LINK_A_W>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_W>  ,  <&trans>   ,                                                                        <&trans>   , <LINK_J_W>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_W> ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
                                  <&kp LGUI>  , <&kp LALT>  , <&kp LCTRL> ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   , <&kp RCTRL> , <&kp RALT>  , <&kp RGUI>  ;
 
