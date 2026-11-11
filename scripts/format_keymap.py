@@ -29,9 +29,12 @@ ROWS = (
 )
 XS = tuple(x for row in ROWS for x in row)
 LAYER_NAMES = ("mac_layer", "win_layer", "lower_layer", "raise_layer", "system_layer")
+# Hold-taps whose two parameters are <hold keycode> <tap keycode>; labelled "TAP/HOLD".
+HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
+             "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
 ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "mega": 2, "trans": 0,
          "bootloader": 0, "sys_reset": 0, "studio_unlock": 0,
-         "lock_mac": 0, "lock_win": 0}
+         "lock_mac": 0, "lock_win": 0, **{name: 2 for name in HOLD_TAPS}}
 BT_ONE = frozenset(("BT_CLR", "BT_NXT", "BT_PRV", "BT_CLR_ALL", "BT_DISC"))
 BT_TWO = frozenset(("BT_SEL",))
 ALIASES = (("LINK_MEGA", "&mega LC(LA(LGUI)) RGUI"), ("LINK_STUDIO", "&studio_unlock"),
@@ -177,21 +180,26 @@ def read_aliases(source):
     return found, True, by_expr
 
 
+def kp_label(code):
+    if code in KP:
+        return KP[code]
+    if len(code) == 1 and "A" <= code <= "Z":
+        return code
+    if re.fullmatch(r"N[0-9]", code):
+        return code[1]
+    if re.fullmatch(r"F(?:[1-9]|1[0-2])", code):
+        return code
+    fail(f"no art label for keycode {code!r}")
+
+
 def label(cell, x):
     behavior, params = cell.behavior, cell.params
     if behavior == "trans":
         return ""
     if behavior == "kp":
-        code = params[0]
-        if code in KP:
-            return KP[code]
-        if len(code) == 1 and "A" <= code <= "Z":
-            return code
-        if re.fullmatch(r"N[0-9]", code):
-            return code[1]
-        if re.fullmatch(r"F(?:[1-9]|1[0-2])", code):
-            return code
-        fail(f"no art label for keycode {code!r}")
+        return kp_label(params[0])
+    if behavior in HOLD_TAPS:
+        return kp_label(params[1]) + "/" + kp_label(params[0])
     if behavior in ("mo", "to", "tog") and params[0].startswith("L_"):
         return ("TG " if behavior == "tog" else "") + params[0][2:]
     if behavior == "bt":
