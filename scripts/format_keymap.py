@@ -28,8 +28,8 @@ ROWS = (
     (200, 300, 400, 515, 625, 982, 1095, 1200, 1300, 1400),
 )
 XS = tuple(x for row in ROWS for x in row)
-LAYER_NAMES = ("default_layer", "mac_layer", "lower_layer", "raise_layer", "system_layer")
-ARITY = {"kp": 1, "mo": 1, "to": 1, "bt": 2, "mega": 2, "trans": 0,
+LAYER_NAMES = ("mac_layer", "win_layer", "lower_layer", "raise_layer", "system_layer")
+ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "mega": 2, "trans": 0,
          "bootloader": 0, "sys_reset": 0, "studio_unlock": 0,
          "lock_mac": 0, "lock_win": 0}
 BT_ONE = frozenset(("BT_CLR", "BT_NXT", "BT_PRV", "BT_CLR_ALL", "BT_DISC"))
@@ -192,10 +192,8 @@ def label(cell, x):
         if re.fullmatch(r"F(?:[1-9]|1[0-2])", code):
             return code
         fail(f"no art label for keycode {code!r}")
-    if behavior == "mo" and params[0] in ("2", "3"):
-        return "LOWER" if params[0] == "2" else "RAISE"
-    if behavior == "to" and params[0] in ("0", "1"):
-        return "WIN" if params[0] == "0" else "MAC"
+    if behavior in ("mo", "to", "tog") and params[0].startswith("L_"):
+        return ("TG " if behavior == "tog" else "") + params[0][2:]
     if behavior == "bt":
         if params[0] == "BT_SEL" and len(params) == 2 and params[1] in ("0", "1", "2", "3", "4"):
             return "BT" + str(int(params[1]) + 1)
