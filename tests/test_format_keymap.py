@@ -13,7 +13,7 @@ from format_keymap import (  # noqa: E402
     geometry,
 )
 
-LAYERS = ("default_layer", "mac_layer", "lower_layer", "raise_layer", "system_layer")
+LAYERS = ("mac_layer", "win_layer", "lower_layer", "raise_layer", "system_layer")
 
 
 def make_keymap(tokens=None, aliases=()):
@@ -105,7 +105,7 @@ class FormatterTests(unittest.TestCase):
 
     def test_art_has_no_phantom_cells_after_slot_snapping(self):
         output = format_keymap(make_keymap())
-        start = output.index("        default_layer {")
+        start = output.index(f"        {LAYERS[0]} {{")
         end = output.index("        };", start)
         art = [line for line in output[start:end].splitlines() if line.startswith("// ")]
         self.assertEqual(len(art), 5)
