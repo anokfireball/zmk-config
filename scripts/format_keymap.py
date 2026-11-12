@@ -28,7 +28,8 @@ ROWS = (
     (200, 300, 400, 515, 625, 982, 1095, 1200, 1300, 1400),
 )
 XS = tuple(x for row in ROWS for x in row)
-LAYER_NAMES = ("mac_layer", "win_layer", "nav_layer", "sym_layer", "fn_layer", "system_layer")
+LAYER_NAMES = ("mac_layer", "win_layer", "nav_layer", "nav_win_layer", "sym_layer", "fn_layer",
+               "system_layer")
 # Hold-taps whose two parameters are <hold keycode> <tap keycode>; labelled "TAP/HOLD".
 HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
              "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
