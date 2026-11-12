@@ -20,7 +20,6 @@
 #define L_NAV_WIN 3
 #define L_SYM     4
 #define L_FN      5
-#define L_SYSTEM  6
 
 // Key positions for positional hold-taps (indices into the bindings lists).
 #define POS_LEFT   0 1 2 3 4 5 12 13 14 15 16 17 24 25 26 27 28 29 36 37 38 39 40 41
@@ -58,6 +57,7 @@
 #define LINK_BRI_DN &kp C_BRI_DN
 #define LINK_BRI_UP &kp C_BRI_UP
 #define LINK_SPC &lt_spc L_NAV SPACE
+#define LINK_BOOT &boot_hold 0 0
 
 // Home row mods and the Esc key on the Caps Lock position. Shared by MAC and WIN where the
 // modifier is the same (S, D, K, L); otherwise _M is MAC (Mac order) and _W is WIN.
@@ -169,7 +169,7 @@
         };
 
         // QMK SLP: lock the host. Single modifier-chord keycodes, so the host
-        // sees a real chord. Left SYSTEM key locks macOS, right one locks Windows.
+        // sees a real chord. On FN: the left key locks macOS, the right one Windows.
         lock_win: lock_win {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
@@ -203,6 +203,18 @@
             tapping-term-ms = <200>;
             quick-tap-ms = <175>;
             retro-tap;
+        };
+
+        // Bootloader behind a 2 s hold; a shorter press does nothing. tap-preferred, so only
+        // the timer can trigger it, never another key. The hold-tap passes on which half the
+        // key is on, so each key puts its own half into the bootloader (the right half only
+        // while it is connected to the left). The parameters are unused: &boot_hold 0 0.
+        boot_hold: boot_hold {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            bindings = <&bootloader>, <&none>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <2000>;
         };
     };
 
@@ -327,42 +339,24 @@
         // Hold either FN key (50, 59). Like Fn on the QMK boards: FN + Tab flips between MAC and
         // WIN. Brightness on 1/2, Bluetooth profiles and clear, USB/BLE output, per-OS lock keys
         // (M:LOCK = Ctrl+Cmd+Q, W:LOCK = Win+L), media, Caps Lock, Print Screen, Insert/Delete,
-        // Studio unlock.
+        // Studio unlock. The top corners, held for 2 s, put their own half into the bootloader;
+        // with the FN key on 50 the left half can do that without the right half. A soft reset
+        // is a single press of the physical reset button.
         fn_layer {
             display-name = "FN";
-// |             |    BRI-     |    BRI+     |             |             |             |                                                                     |             |             |             |             |             |             |
+// |   L:BOOT    |    BRI-     |    BRI+     |             |             |             |                                                                     |             |             |             |             |             |   R:BOOT    |
 // |   TG WIN    |     BT1     |     BT2     |     BT3     |     BT4     |     BT5     |                                                                     |             |             |             |             |     INS     |     DEL     |
 // |             |             |             |             |             |             |                                                                     |     USB     |     BLE     |             |             |   M:LOCK    |   W:LOCK    |
 // |             |    BTCLR    |             |             |             |             |             |                                         |             |    CAPS     |             |    PREV     |    NEXT     |    PSCR     |             |
 //                             |             |             |             |             |  ST.ULOCK   |                                         |             |             |             |             |             |
             bindings =
-      <&trans>   ,<LINK_BRI_DN>,<LINK_BRI_UP>,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
+     <LINK_BOOT> ,<LINK_BRI_DN>,<LINK_BRI_UP>,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   , <LINK_BOOT> ,
     <&tog L_WIN> , <LINK_BT1>  , <LINK_BT2>  , <LINK_BT3>  , <LINK_BT4>  , <LINK_BT5>  ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&kp INS>  ,  <&kp DEL>  ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                       <LINK_USB>  , <LINK_BLE>  ,  <&trans>   ,  <&trans>   , <&lock_mac> , <&lock_win> ,
       <&trans>   ,<&bt BT_CLR> ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   , <&kp CAPS>  ,  <&trans>   ,<&kp C_PREV> ,<&kp C_NEXT> , <&kp PSCRN> ,  <&trans>   ,
                                   <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,<LINK_STUDIO>,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
-        };
-
-        // Active while SYM and FN are both held (see conditional_layers).
-        // Reset behaviors act on the half that owns the pressed key: the left half
-        // is the central, the right half only responds while connected to it.
-        // The two keys in front of the reset corners lock the host: left locks
-        // macOS, right locks Windows.
-        system_layer {
-            display-name = "SYSTEM";
-// |   L:BOOT    |    L:RST    |   M:LOCK    |             |             |             |                                                                     |             |             |             |   W:LOCK    |    R:RST    |   R:BOOT    |
-// |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
-// |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
-// |             |             |             |             |             |             |             |                                         |             |             |             |             |             |             |             |
-//                             |             |             |             |             |             |                                         |             |             |             |             |             |
-            bindings =
-    <&bootloader>,<&sys_reset> , <&lock_mac> ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   , <&lock_win> ,<&sys_reset> ,<&bootloader>,
-      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-                                  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
         };
     };
 };
@@ -374,11 +368,6 @@
         nav_win {
             if-layers = <L_WIN L_NAV>;
             then-layer = <L_NAV_WIN>;
-        };
-
-        system_tri_layer {
-            if-layers = <L_SYM L_FN>;
-            then-layer = <L_SYSTEM>;
         };
     };
 };
