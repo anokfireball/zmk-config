@@ -32,14 +32,14 @@ LAYER_NAMES = ("mac_layer", "win_layer", "nav_layer", "nav_win_layer", "sym_laye
 # Hold-taps whose two parameters are <hold keycode> <tap keycode>; labelled "TAP/HOLD".
 HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
              "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
-ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "mega": 2, "trans": 0, "none": 0,
+ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "trans": 0, "none": 0,
          "studio_unlock": 0, "boot_hold": 2,
          "lock_mac": 0, "lock_win": 0, "bs_del": 0, "out": 1, "lt_spc": 2,
          **{name: 2 for name in HOLD_TAPS}}
 OUT = {"OUT_USB": "USB", "OUT_BLE": "BLE"}
 BT_ONE = frozenset(("BT_CLR", "BT_NXT", "BT_PRV", "BT_CLR_ALL", "BT_DISC"))
 BT_TWO = frozenset(("BT_SEL",))
-ALIASES = (("LINK_MEGA", "&mega LC(LA(LGUI)) RGUI"), ("LINK_STUDIO", "&studio_unlock"),
+ALIASES = (("LINK_MEGA", "&kp LC(LA(LGUI))"), ("LINK_STUDIO", "&studio_unlock"),
            ("LINK_MULT", "&kp KP_MULTIPLY"), ("LINK_BT1", "&bt BT_SEL 0"),
            ("LINK_BT2", "&bt BT_SEL 1"), ("LINK_BT3", "&bt BT_SEL 2"),
            ("LINK_BT4", "&bt BT_SEL 3"), ("LINK_BT5", "&bt BT_SEL 4"))
@@ -57,7 +57,7 @@ KP = {
     "INS": "INS", "DEL": "DEL", "UP": "^", "DOWN": "v", "LEFT": "<-",
     "RIGHT": "->", "CAPS": "CAPS", "C_PREV": "PREV", "C_NEXT": "NEXT",
     "PSCRN": "PSCR", "C_BRI_DN": "BRI-", "C_BRI_UP": "BRI+",
-    "LC(UP)": "MISSION CTL", "LG(TAB)": "TASK VIEW",
+    "LC(UP)": "MISSION CTL", "LG(TAB)": "TASK VIEW", "LC(LA(LGUI))": "MEGA",
 }
 Binding = namedtuple("Binding", "alias expr behavior params")
 
@@ -219,8 +219,6 @@ def label(cell, x):
         if params == ("BT_CLR",):
             return "BTCLR"
         fail(f"no art label for &bt {' '.join(params)}")
-    if behavior == "mega" and params == ("LC(LA(LGUI))", "RGUI"):
-        return "MEGA"
     if behavior == "studio_unlock":
         return "ST.ULOCK"
     if behavior == "boot_hold":

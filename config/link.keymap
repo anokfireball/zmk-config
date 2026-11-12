@@ -44,7 +44,7 @@
     quick-tap-ms = <175>; \
     hold-trigger-on-release;
 
-#define LINK_MEGA &mega LC(LA(LGUI)) RGUI
+#define LINK_MEGA &kp LC(LA(LGUI))
 #define LINK_STUDIO &studio_unlock
 #define LINK_MULT &kp KP_MULTIPLY
 #define LINK_BT1 &bt BT_SEL 0
@@ -157,17 +157,6 @@
             hold-trigger-key-positions = <HRM_TRIGGERS_R>;
         };
 
-        // QMK MEGA: tap = right Cmd, hold = Ctrl+Alt+Cmd. Param order matches
-        // `&mt` (hold first, tap second); hold-preferred with a long term so
-        // the tap still fires reliably on a quick press.
-        mega: mega {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            flavor = "hold-preferred";
-            tapping-term-ms = <200>;
-            bindings = <&kp>, <&kp>;
-        };
-
         // QMK SLP: lock the host. Single modifier-chord keycodes, so the host
         // sees a real chord. On FN: the left key locks macOS, the right one Windows.
         lock_win: lock_win {
@@ -235,44 +224,46 @@
 
         // Default layer. The home row carries the modifiers (Ctrl, Option, Shift, Cmd | Cmd,
         // Shift, Option, Ctrl), so the thumbs carry none. Thumb row, mirrored around the two big
-        // inner keys: Backspace (Shift = Delete) and Space (hold = NAV); then an unused key and
-        // Enter; SYM on both hands; the window overview (Mission Control, Ctrl+Up) and MEGA
-        // (tap = right Cmd, hold = Ctrl+Option+Cmd); FN on both outer keys. Esc on tap, Cmd on
-        // hold left of A. `=` sits right of P.
+        // inner keys: Backspace (Shift = Delete) and Space (hold = NAV); then MEGA (holds
+        // Ctrl+Option+Cmd, no tap, for workspace switching with the left hand: 1-5, Q-T, A-G,
+        // Z-B) and Enter; SYM on both hands; the window overview (Mission Control, Ctrl+Up) and
+        // an unused key; FN on both outer keys. Esc on tap, Cmd on hold left of A. `=` sits
+        // right of P.
         mac_layer {
             display-name = "MAC";
 // |      `      |      1      |      2      |      3      |      4      |      5      |                                                                     |      6      |      7      |      8      |      9      |      0      |      -      |
 // |     TAB     |      Q      |      W      |      E      |      R      |      T      |                                                                     |      Y      |      U      |      I      |      O      |      P      |      =      |
 // |  ESC/LGUI   |   A/LCTL    |    S/ALT    |   D/SHIFT   |   F/LGUI    |      G      |                                                                     |      H      |   J/LGUI    |   K/SHIFT   |    L/ALT    |   ;/LCTL    |      '      |
 // |    SHIFT    |      Z      |      X      |      C      |      V      |      B      |    MUTE     |                                         |    PLAY     |      N      |      M      |      ,      |      .      |      /      |    SHIFT    |
-//                             |     FN      | MISSION CTL |     SYM     |    NONE     |  BKSPC/DEL  |                                         |  SPACE/NAV  |    ENTER    |     SYM     |    MEGA     |     FN      |
+//                             |     FN      | MISSION CTL |     SYM     |    MEGA     |  BKSPC/DEL  |                                         |  SPACE/NAV  |    ENTER    |     SYM     |    NONE     |     FN      |
             bindings =
      <&kp GRAVE> ,  <&kp N1>   ,  <&kp N2>   ,  <&kp N3>   ,  <&kp N4>   ,  <&kp N5>   ,                                                                        <&kp N6>   ,  <&kp N7>   ,  <&kp N8>   ,  <&kp N9>   ,  <&kp N0>   , <&kp MINUS> ,
       <&kp TAB>  ,   <&kp Q>   ,   <&kp W>   ,   <&kp E>   ,   <&kp R>   ,   <&kp T>   ,                                                                         <&kp Y>   ,   <&kp U>   ,   <&kp I>   ,   <&kp O>   ,   <&kp P>   , <&kp EQUAL> ,
     <LINK_ESC_M> , <LINK_A_M>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_M>  ,   <&kp G>   ,                                                                         <&kp H>   , <LINK_J_M>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_M> , <&kp APOS>  ,
      <&kp LSHFT> ,   <&kp Z>   ,   <&kp X>   ,   <&kp C>   ,   <&kp V>   ,   <&kp B>   ,<&kp C_MUTE> ,                                           <&kp C_PP>  ,   <&kp N>   ,   <&kp M>   , <&kp COMMA> ,  <&kp DOT>  , <&kp FSLH>  , <&kp RSHFT> ,
-                                 <&mo L_FN>  ,<&kp LC(UP)> , <&mo L_SYM> ,   <&none>   ,  <&bs_del>  ,                                           <LINK_SPC>  ,  <&kp RET>  , <&mo L_SYM> , <LINK_MEGA> , <&mo L_FN>  ;
+                                 <&mo L_FN>  ,<&kp LC(UP)> , <&mo L_SYM> , <LINK_MEGA> ,  <&bs_del>  ,                                           <LINK_SPC>  ,  <&kp RET>  , <&mo L_SYM> ,   <&none>   , <&mo L_FN>  ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
 
         // Toggled on top of MAC for Windows/Linux. Only OS-dependent keys are overridden: home
         // row mods in Windows order (GUI, Alt, Shift, Ctrl | Ctrl, Shift, Alt, GUI), Esc/Ctrl
-        // left of A, Task View (Win+Tab) as the window overview, and Right Alt (AltGr) in MEGA's
-        // place. Everything else falls through to MAC.
+        // left of A, Task View (Win+Tab) as the window overview, nothing on the MEGA key (no
+        // Windows counterpart yet), and Right Alt (AltGr) on the key that is unused on MAC.
+        // Everything else falls through to MAC.
         win_layer {
             display-name = "WIN";
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |  ESC/LCTL   |   A/LGUI    |             |             |   F/LCTL    |             |                                                                     |             |   J/LCTL    |             |             |   ;/LGUI    |             |
 // |             |             |             |             |             |             |             |                                         |             |             |             |             |             |             |             |
-//                             |             |  TASK VIEW  |             |             |             |                                         |             |             |             |    RALT     |             |
+//                             |             |  TASK VIEW  |             |    NONE     |             |                                         |             |             |             |    RALT     |             |
             bindings =
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
     <LINK_ESC_W> , <LINK_A_W>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_W>  ,  <&trans>   ,                                                                        <&trans>   , <LINK_J_W>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_W> ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-                                  <&trans>   ,<&kp LG(TAB)>,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   , <&kp RALT>  ,  <&trans>   ;
+                                  <&trans>   ,<&kp LG(TAB)>,  <&trans>   ,   <&none>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   , <&kp RALT>  ,  <&trans>   ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
