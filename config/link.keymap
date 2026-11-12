@@ -12,12 +12,15 @@
 // Layer indices. A higher index wins; &trans falls through to the layer below.
 // MAC (default layer, always active) is the base. WIN sits directly above it and
 // only overrides OS-dependent keys; every other position falls through to MAC.
-#define L_MAC    0
-#define L_WIN    1
-#define L_NAV    2
-#define L_SYM    3
-#define L_FN     4
-#define L_SYSTEM 5
+// NAV_WIN is never selected by a key: it is on while WIN and NAV are both on
+// (see conditional_layers).
+#define L_MAC     0
+#define L_WIN     1
+#define L_NAV     2
+#define L_NAV_WIN 3
+#define L_SYM     4
+#define L_FN      5
+#define L_SYSTEM  6
 
 // Key positions for positional hold-taps (indices into the bindings lists).
 #define POS_LEFT   0 1 2 3 4 5 12 13 14 15 16 17 24 25 26 27 28 29 36 37 38 39 40 41
@@ -263,23 +266,43 @@
 
         // Hold Space. QMK Space layer: arrows on H J K L (Vim order: left, down, up, right),
         // F1-F12 on the number row (F12 right of P), Delete on Backspace, plus
-        // Home/PgDn/PgUp/End below the arrows in the same order. The left hand stays
-        // transparent so the home row mods combine with arrows.
+        // Home/PgDn/PgUp/End below the arrows in the same order.
+        // The left home row holds plain modifiers in the home row mod order (Ctrl, Option,
+        // Shift, Cmd), without a tapping term: Space + A + H is Ctrl+Left at once, and the same
+        // keys give an instant modifier for mouse clicks or Tab.
         nav_layer {
             display-name = "NAV";
 // |             |     F1      |     F2      |     F3      |     F4      |     F5      |                                                                     |     F6      |     F7      |     F8      |     F9      |     F10     |     F11     |
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |     F12     |
-// |             |             |             |             |             |             |                                                                     |     <-      |      v      |      ^      |     ->      |             |             |
+// |             |    LCTL     |     ALT     |    SHIFT    |    LGUI     |             |                                                                     |     <-      |      v      |      ^      |     ->      |             |             |
 // |             |             |             |             |             |             |             |                                         |             |    HOME     |    PGDN     |    PGUP     |     END     |             |             |
 //                             |             |             |             |             |     DEL     |                                         |             |             |             |             |             |
             bindings =
       <&trans>   ,  <&kp F1>   ,  <&kp F2>   ,  <&kp F3>   ,  <&kp F4>   ,  <&kp F5>   ,                                                                        <&kp F6>   ,  <&kp F7>   ,  <&kp F8>   ,  <&kp F9>   ,  <&kp F10>  ,  <&kp F11>  ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&kp F12>  ,
-      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                       <&kp LEFT>  , <&kp DOWN>  ,  <&kp UP>   , <&kp RIGHT> ,  <&trans>   ,  <&trans>   ,
+      <&trans>   , <&kp LCTRL> , <&kp LALT>  , <&kp LSHFT> , <&kp LGUI>  ,  <&trans>   ,                                                                       <&kp LEFT>  , <&kp DOWN>  ,  <&kp UP>   , <&kp RIGHT> ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   , <&kp HOME>  , <&kp PGDN>  , <&kp PGUP>  ,  <&kp END>  ,  <&trans>   ,  <&trans>   ,
                                   <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&kp DEL>  ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
+        };
+
+        // On while WIN and NAV are both on: the NAV modifiers in Windows order (GUI, Alt,
+        // Shift, Ctrl). Only A and F differ from NAV. No sensor-bindings: the encoders fall
+        // through to NAV.
+        nav_win_layer {
+            display-name = "NAV WIN";
+// |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
+// |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
+// |             |    LGUI     |             |             |    LCTL     |             |                                                                     |             |             |             |             |             |             |
+// |             |             |             |             |             |             |             |                                         |             |             |             |             |             |             |             |
+//                             |             |             |             |             |             |                                         |             |             |             |             |             |
+            bindings =
+      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
+      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
+      <&trans>   , <&kp LGUI>  ,  <&trans>   ,  <&trans>   , <&kp LCTRL> ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
+      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
+                                  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
         };
 
         // Hold either SYM key (52, 57). Digits and symbols.
@@ -346,6 +369,11 @@
 / {
     conditional_layers {
         compatible = "zmk,conditional-layers";
+
+        nav_win {
+            if-layers = <L_WIN L_NAV>;
+            then-layer = <L_NAV_WIN>;
+        };
 
         system_tri_layer {
             if-layers = <L_SYM L_FN>;
