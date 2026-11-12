@@ -13,7 +13,8 @@ from format_keymap import (  # noqa: E402
     geometry,
 )
 
-LAYERS = ("mac_layer", "win_layer", "nav_layer", "sym_layer", "fn_layer", "system_layer")
+LAYERS = ("mac_layer", "win_layer", "nav_layer", "nav_win_layer", "sym_layer", "fn_layer",
+          "system_layer")
 
 
 def make_keymap(tokens=None, aliases=()):
