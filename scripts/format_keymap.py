@@ -34,7 +34,7 @@ HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
              "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
 ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "mega": 2, "trans": 0,
          "bootloader": 0, "sys_reset": 0, "studio_unlock": 0,
-         "lock_mac": 0, "lock_win": 0, **{name: 2 for name in HOLD_TAPS}}
+         "lock_mac": 0, "lock_win": 0, "bs_del": 0, **{name: 2 for name in HOLD_TAPS}}
 BT_ONE = frozenset(("BT_CLR", "BT_NXT", "BT_PRV", "BT_CLR_ALL", "BT_DISC"))
 BT_TWO = frozenset(("BT_SEL",))
 ALIASES = (("LINK_MEGA", "&mega LC(LA(LGUI)) RGUI"), ("LINK_STUDIO", "&studio_unlock"),
@@ -202,6 +202,8 @@ def label(cell, x):
         return kp_label(params[1]) + "/" + kp_label(params[0])
     if behavior in ("mo", "to", "tog") and params[0].startswith("L_"):
         return ("TG " if behavior == "tog" else "") + params[0][2:]
+    if behavior == "bs_del":
+        return "BKSPC/DEL"
     if behavior == "bt":
         if params[0] == "BT_SEL" and len(params) == 2 and params[1] in ("0", "1", "2", "3", "4"):
             return "BT" + str(int(params[1]) + 1)
