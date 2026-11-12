@@ -54,6 +54,7 @@
 #define LINK_BLE &out OUT_BLE
 #define LINK_BRI_DN &kp C_BRI_DN
 #define LINK_BRI_UP &kp C_BRI_UP
+#define LINK_SPC &lt_spc L_NAV SPACE
 
 // Home row mods and the Esc key on the Caps Lock position. Shared by MAC and WIN where the
 // modifier is the same (S, D, K, L); otherwise _M is MAC (Mac order) and _W is WIN.
@@ -186,6 +187,20 @@
             bindings = <&kp BSPC>, <&kp DEL>;
             mods = <(MOD_LSFT|MOD_RSFT)>;
         };
+
+        // Space on tap, NAV on hold. balanced: another key pressed and released while Space is
+        // down selects NAV (QMK: LT(layer, KC_SPC) with PERMISSIVE_HOLD). No typing guard and no
+        // positional check on Space (QMK marks the thumbs '*'). retro-tap: held alone and
+        // released, it still types a space (QMK RETRO_TAPPING).
+        lt_spc: lt_spc {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            bindings = <&mo>, <&kp>;
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+            quick-tap-ms = <175>;
+            retro-tap;
+        };
     };
 
     combos {
@@ -203,69 +218,71 @@
     keymap {
         compatible = "zmk,keymap";
 
-        // Default layer. Mac modifier order: Ctrl, Option, Cmd on the left thumbs; on the right
-        // NAV, MEGA (tap = right Cmd, hold = Ctrl+Option+Cmd), Option and FN.
-        // Home row mods: Ctrl, Option, Shift, Cmd | Cmd, Shift, Option, Ctrl. Esc on tap,
-        // Cmd on hold left of A.
+        // Default layer. The home row carries the modifiers (Ctrl, Option, Shift, Cmd | Cmd,
+        // Shift, Option, Ctrl), so the thumbs carry none. Thumb row, mirrored around the two big
+        // inner keys: Backspace (Shift = Delete) and Space (hold = NAV); then an unused key and
+        // Enter; SYM on both hands; an unused key and MEGA (tap = right Cmd, hold =
+        // Ctrl+Option+Cmd); FN on both outer keys. Esc on tap, Cmd on hold left of A.
+        // `=` sits right of P.
         mac_layer {
             display-name = "MAC";
 // |      `      |      1      |      2      |      3      |      4      |      5      |                                                                     |      6      |      7      |      8      |      9      |      0      |      -      |
-// |     TAB     |      Q      |      W      |      E      |      R      |      T      |                                                                     |      Y      |      U      |      I      |      O      |      P      |  BKSPC/DEL  |
+// |     TAB     |      Q      |      W      |      E      |      R      |      T      |                                                                     |      Y      |      U      |      I      |      O      |      P      |      =      |
 // |  ESC/LGUI   |   A/LCTL    |    S/ALT    |   D/SHIFT   |   F/LGUI    |      G      |                                                                     |      H      |   J/LGUI    |   K/SHIFT   |    L/ALT    |   ;/LCTL    |      '      |
 // |    SHIFT    |      Z      |      X      |      C      |      V      |      B      |    MUTE     |                                         |    PLAY     |      N      |      M      |      ,      |      .      |      /      |    SHIFT    |
-//                             |    LCTL     |     ALT     |    LGUI     |     SYM     |    ENTER    |                                         |    SPACE    |     NAV     |    MEGA     |    RALT     |     FN      |
+//                             |     FN      |    NONE     |     SYM     |    NONE     |  BKSPC/DEL  |                                         |  SPACE/NAV  |    ENTER    |     SYM     |    MEGA     |     FN      |
             bindings =
      <&kp GRAVE> ,  <&kp N1>   ,  <&kp N2>   ,  <&kp N3>   ,  <&kp N4>   ,  <&kp N5>   ,                                                                        <&kp N6>   ,  <&kp N7>   ,  <&kp N8>   ,  <&kp N9>   ,  <&kp N0>   , <&kp MINUS> ,
-      <&kp TAB>  ,   <&kp Q>   ,   <&kp W>   ,   <&kp E>   ,   <&kp R>   ,   <&kp T>   ,                                                                         <&kp Y>   ,   <&kp U>   ,   <&kp I>   ,   <&kp O>   ,   <&kp P>   ,  <&bs_del>  ,
+      <&kp TAB>  ,   <&kp Q>   ,   <&kp W>   ,   <&kp E>   ,   <&kp R>   ,   <&kp T>   ,                                                                         <&kp Y>   ,   <&kp U>   ,   <&kp I>   ,   <&kp O>   ,   <&kp P>   , <&kp EQUAL> ,
     <LINK_ESC_M> , <LINK_A_M>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_M>  ,   <&kp G>   ,                                                                         <&kp H>   , <LINK_J_M>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_M> , <&kp APOS>  ,
      <&kp LSHFT> ,   <&kp Z>   ,   <&kp X>   ,   <&kp C>   ,   <&kp V>   ,   <&kp B>   ,<&kp C_MUTE> ,                                           <&kp C_PP>  ,   <&kp N>   ,   <&kp M>   , <&kp COMMA> ,  <&kp DOT>  , <&kp FSLH>  , <&kp RSHFT> ,
-                                 <&kp LCTRL> , <&kp LALT>  , <&kp LGUI>  , <&mo L_SYM> ,  <&kp RET>  ,                                           <&kp SPACE> , <&mo L_NAV> , <LINK_MEGA> , <&kp RALT>  , <&mo L_FN>  ;
+                                 <&mo L_FN>  ,   <&none>   , <&mo L_SYM> ,   <&none>   ,  <&bs_del>  ,                                           <LINK_SPC>  ,  <&kp RET>  , <&mo L_SYM> , <LINK_MEGA> , <&mo L_FN>  ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
 
-        // Toggled on top of MAC for Windows/Linux. Only OS-dependent keys are overridden:
-        // GUI, Alt, Ctrl on the left thumbs and Right Ctrl in MEGA's place; home row mods in
-        // Windows order (GUI, Alt, Shift, Ctrl | Ctrl, Shift, Alt, GUI); Esc/Ctrl left of A.
-        // Everything else falls through to MAC.
+        // Toggled on top of MAC for Windows/Linux. Only OS-dependent keys are overridden: home
+        // row mods in Windows order (GUI, Alt, Shift, Ctrl | Ctrl, Shift, Alt, GUI), Esc/Ctrl
+        // left of A, and Right Alt (AltGr) in MEGA's place. Everything else falls through to MAC.
         win_layer {
             display-name = "WIN";
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |  ESC/LCTL   |   A/LGUI    |             |             |   F/LCTL    |             |                                                                     |             |   J/LCTL    |             |             |   ;/LGUI    |             |
 // |             |             |             |             |             |             |             |                                         |             |             |             |             |             |             |             |
-//                             |    LGUI     |             |    LCTL     |             |             |                                         |             |             |    RCTL     |             |             |
+//                             |             |             |             |             |             |                                         |             |             |             |    RALT     |             |
             bindings =
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
     <LINK_ESC_W> , <LINK_A_W>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_W>  ,  <&trans>   ,                                                                        <&trans>   , <LINK_J_W>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_W> ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-                                 <&kp LGUI>  , <&kp LALT>  , <&kp LCTRL> ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   , <&kp RCTRL> ,  <&trans>   ,  <&trans>   ;
+                                  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   , <&kp RALT>  ,  <&trans>   ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
 
-        // QMK Space layer: arrows on H J K L (Vim order: left, down, up, right), F1-F12 on the
-        // number row (F12 right of P), plus Home/PgDn/PgUp/End below the arrows in the same
-        // order. The left hand stays transparent so the home row mods combine with arrows.
+        // Hold Space. QMK Space layer: arrows on H J K L (Vim order: left, down, up, right),
+        // F1-F12 on the number row (F12 right of P), Delete on Backspace, plus
+        // Home/PgDn/PgUp/End below the arrows in the same order. The left hand stays
+        // transparent so the home row mods combine with arrows.
         nav_layer {
             display-name = "NAV";
 // |             |     F1      |     F2      |     F3      |     F4      |     F5      |                                                                     |     F6      |     F7      |     F8      |     F9      |     F10     |     F11     |
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |     F12     |
 // |             |             |             |             |             |             |                                                                     |     <-      |      v      |      ^      |     ->      |             |             |
 // |             |             |             |             |             |             |             |                                         |             |    HOME     |    PGDN     |    PGUP     |     END     |             |             |
-//                             |             |             |             |             |             |                                         |             |             |             |             |             |
+//                             |             |             |             |             |     DEL     |                                         |             |             |             |             |             |
             bindings =
       <&trans>   ,  <&kp F1>   ,  <&kp F2>   ,  <&kp F3>   ,  <&kp F4>   ,  <&kp F5>   ,                                                                        <&kp F6>   ,  <&kp F7>   ,  <&kp F8>   ,  <&kp F9>   ,  <&kp F10>  ,  <&kp F11>  ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&kp F12>  ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                       <&kp LEFT>  , <&kp DOWN>  ,  <&kp UP>   , <&kp RIGHT> ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   , <&kp HOME>  , <&kp PGDN>  , <&kp PGUP>  ,  <&kp END>  ,  <&trans>   ,  <&trans>   ,
-                                  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
+                                  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&kp DEL>  ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
 
-        // Digits and symbols.
+        // Hold either SYM key (52, 57). Digits and symbols.
         sym_layer {
             display-name = "SYM";
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
@@ -283,9 +300,10 @@
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
 
-        // Like Fn on the QMK boards: FN + Tab flips between MAC and WIN. Brightness on 1/2,
-        // Bluetooth profiles and clear, USB/BLE output, per-OS lock keys (M:LOCK = Ctrl+Cmd+Q,
-        // W:LOCK = Win+L), media, Caps Lock, Print Screen, Insert/Delete, Studio unlock.
+        // Hold either FN key (50, 59). Like Fn on the QMK boards: FN + Tab flips between MAC and
+        // WIN. Brightness on 1/2, Bluetooth profiles and clear, USB/BLE output, per-OS lock keys
+        // (M:LOCK = Ctrl+Cmd+Q, W:LOCK = Win+L), media, Caps Lock, Print Screen, Insert/Delete,
+        // Studio unlock.
         fn_layer {
             display-name = "FN";
 // |             |    BRI-     |    BRI+     |             |             |             |                                                                     |             |             |             |             |             |             |
