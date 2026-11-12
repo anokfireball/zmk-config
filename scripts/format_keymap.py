@@ -58,6 +58,7 @@ KP = {
     "INS": "INS", "DEL": "DEL", "UP": "^", "DOWN": "v", "LEFT": "<-",
     "RIGHT": "->", "CAPS": "CAPS", "C_PREV": "PREV", "C_NEXT": "NEXT",
     "PSCRN": "PSCR", "C_BRI_DN": "BRI-", "C_BRI_UP": "BRI+",
+    "LC(UP)": "MISSION CTL", "LG(TAB)": "TASK VIEW",
 }
 Binding = namedtuple("Binding", "alias expr behavior params")
 
