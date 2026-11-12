@@ -13,11 +13,11 @@ from format_keymap import (  # noqa: E402
     geometry,
 )
 
-LAYERS = ("mac_layer", "win_layer", "lower_layer", "raise_layer", "system_layer")
+LAYERS = ("mac_layer", "win_layer", "nav_layer", "sym_layer", "fn_layer", "system_layer")
 
 
 def make_keymap(tokens=None, aliases=()):
-    """Five layers, 60 comma-separated one-binding groups, optional aliases."""
+    """All known layers, 60 comma-separated one-binding groups, optional aliases."""
     tokens = list(tokens or ["&trans"] * 60)
     assert len(tokens) == 60
     definitions = "".join(f"#define {name} {value}\n" for name, value in aliases)

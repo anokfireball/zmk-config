@@ -28,13 +28,15 @@ ROWS = (
     (200, 300, 400, 515, 625, 982, 1095, 1200, 1300, 1400),
 )
 XS = tuple(x for row in ROWS for x in row)
-LAYER_NAMES = ("mac_layer", "win_layer", "lower_layer", "raise_layer", "system_layer")
+LAYER_NAMES = ("mac_layer", "win_layer", "nav_layer", "sym_layer", "fn_layer", "system_layer")
 # Hold-taps whose two parameters are <hold keycode> <tap keycode>; labelled "TAP/HOLD".
 HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
              "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
 ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "mega": 2, "trans": 0,
          "bootloader": 0, "sys_reset": 0, "studio_unlock": 0,
-         "lock_mac": 0, "lock_win": 0, "bs_del": 0, **{name: 2 for name in HOLD_TAPS}}
+         "lock_mac": 0, "lock_win": 0, "bs_del": 0, "out": 1,
+         **{name: 2 for name in HOLD_TAPS}}
+OUT = {"OUT_USB": "USB", "OUT_BLE": "BLE"}
 BT_ONE = frozenset(("BT_CLR", "BT_NXT", "BT_PRV", "BT_CLR_ALL", "BT_DISC"))
 BT_TWO = frozenset(("BT_SEL",))
 ALIASES = (("LINK_MEGA", "&mega LC(LA(LGUI)) RGUI"), ("LINK_STUDIO", "&studio_unlock"),
@@ -54,7 +56,7 @@ KP = {
     "PGUP": "PGUP", "PGDN": "PGDN", "HOME": "HOME", "END": "END",
     "INS": "INS", "DEL": "DEL", "UP": "^", "DOWN": "v", "LEFT": "<-",
     "RIGHT": "->", "CAPS": "CAPS", "C_PREV": "PREV", "C_NEXT": "NEXT",
-    "PSCRN": "PSCR",
+    "PSCRN": "PSCR", "C_BRI_DN": "BRI-", "C_BRI_UP": "BRI+",
 }
 Binding = namedtuple("Binding", "alias expr behavior params")
 
@@ -204,6 +206,8 @@ def label(cell, x):
         return ("TG " if behavior == "tog" else "") + params[0][2:]
     if behavior == "bs_del":
         return "BKSPC/DEL"
+    if behavior == "out" and params[0] in OUT:
+        return OUT[params[0]]
     if behavior == "bt":
         if params[0] == "BT_SEL" and len(params) == 2 and params[1] in ("0", "1", "2", "3", "4"):
             return "BT" + str(int(params[1]) + 1)
@@ -296,7 +300,7 @@ def format_keymap(source):
     keymap_start = keymaps[0].start(1)
     layers = list(LAYER_RE.finditer(keymaps[0].group(1)))
     if tuple(match.group(1) for match in layers) != LAYER_NAMES:
-        fail("expected the five known layer nodes in order")
+        fail("expected the known layer nodes in order: " + ", ".join(LAYER_NAMES))
     parsed = []
     for match in layers:
         body = match.group(2)
