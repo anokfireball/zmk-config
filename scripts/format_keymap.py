@@ -33,7 +33,7 @@ LAYER_NAMES = ("mac_layer", "win_layer", "nav_layer", "nav_win_layer", "sym_laye
 HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
              "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
 ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "trans": 0, "none": 0,
-         "studio_unlock": 0, "boot_hold": 2,
+         "studio_unlock": 0, "boot_hold": 2, "sys_reset": 0, "sleep_all": 0,
          "lock_mac": 0, "lock_win": 0, "bs_del": 0, "out": 1, "lt_spc": 2,
          **{name: 2 for name in HOLD_TAPS}}
 OUT = {"OUT_USB": "USB", "OUT_BLE": "BLE"}
@@ -223,6 +223,10 @@ def label(cell, x):
         return "ST.ULOCK"
     if behavior == "boot_hold":
         return ("L" if x < 800 else "R") + ":BOOT"
+    if behavior == "sys_reset":
+        return ("L" if x < 800 else "R") + ":RESET"
+    if behavior == "sleep_all":
+        return "SLEEP"
     if behavior == "lock_mac":
         return "M:LOCK"
     if behavior == "lock_win":
