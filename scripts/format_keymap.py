@@ -32,15 +32,18 @@ LAYER_NAMES = ("mac_layer", "win_layer", "nav_layer", "nav_win_layer", "sym_laye
                "sym_win_layer", "fn_layer")
 # Hold-taps whose two parameters are <hold keycode> <tap keycode>; labelled "TAP/HOLD".
 HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
-             "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
+             "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky", "nav_ht", "nav_ht_w")
 ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "trans": 0, "none": 0,
          "studio_unlock": 0, "boot_hold": 2, "sys_reset": 0, "sleep_all": 0,
          "lock_mac": 0, "lock_win": 0, "bs_del": 0, "out": 1, "lt_spc": 2,
          "dk_sp": 1, "win_grv": 0, "win_apos": 0, "win_6": 0,
+         "nav_ae_m": 2, "oe_m": 0, "ue_m": 0,
          **{name: 2 for name in HOLD_TAPS}}
 OUT = {"OUT_USB": "USB", "OUT_BLE": "BLE"}
 # US-International dead-key keys on WIN (character + Space); labelled like the plain key.
 WIN_DEAD = {"win_grv": "`", "win_apos": "'", "win_6": "6"}
+# MAC umlauts (Option+U, then the vowel); ASCII labels keep the art columns aligned.
+UMLAUT_MAC = {"oe_m": "OE", "ue_m": "UE"}
 BT_ONE = frozenset(("BT_CLR", "BT_NXT", "BT_PRV", "BT_CLR_ALL", "BT_DISC"))
 BT_TWO = frozenset(("BT_SEL",))
 ALIASES = (("LINK_MEGA", "&kp LC(LA(LGUI))"), ("LINK_STUDIO", "&studio_unlock"),
@@ -62,6 +65,8 @@ KP = {
     "RIGHT": "->", "CAPS": "CAPS", "C_PREV": "PREV", "C_NEXT": "NEXT",
     "PSCRN": "PSCR", "C_BRI_DN": "BRI-", "C_BRI_UP": "BRI+",
     "LC(UP)": "MISSION CTL", "LG(TAB)": "TASK VIEW", "LC(LA(LGUI))": "MEGA",
+    "LS(LA(N2))": "EUR", "LA(S)": "SS", "RA(N5)": "EUR", "RA(S)": "SS",
+    "RA(Q)": "AE", "RA(P)": "OE", "RA(Y)": "UE",
 }
 Binding = namedtuple("Binding", "alias expr behavior params")
 
@@ -219,6 +224,10 @@ def label(cell, x):
         return kp_label(params[0])
     if behavior in WIN_DEAD:
         return WIN_DEAD[behavior]
+    if behavior in UMLAUT_MAC:
+        return UMLAUT_MAC[behavior]
+    if behavior == "nav_ae_m":
+        return "AE/" + kp_label(params[0])
     if behavior == "out" and params[0] in OUT:
         return OUT[params[0]]
     if behavior == "bt":
