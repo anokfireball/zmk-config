@@ -24,20 +24,26 @@
 #define POS_ENCODERS 42 43
 
 // Keys that may turn a home row mod into a hold, mirroring QMK Chordal Hold: the other hand
-// and the keys QMK marks '*' (thumbs, here also the encoder clicks).
+// and the keys QMK marks '*' (thumbs, here also the encoder clicks). The Shift fingers also
+// accept their own hand's index key (F, J), so Shift + Cmd/Ctrl stack in either order.
 #define HRM_TRIGGERS_L POS_RIGHT POS_THUMBS POS_ENCODERS
 #define HRM_TRIGGERS_R POS_LEFT POS_THUMBS POS_ENCODERS
+#define HRM_TRIGGERS_SHIFT_L HRM_TRIGGERS_L 28
+#define HRM_TRIGGERS_SHIFT_R HRM_TRIGGERS_R 31
 
 // Properties shared by every home row mod. Flavor, term, typing guard and trigger positions
-// are set per node below. hold-trigger-on-release judges the first key *released* while the
-// mod is undecided, like QMK Chordal Hold on a nested tap: a same-hand key (J, then K tapped)
-// gives taps, while same-side mods still stack (hold D+F, tap J = Shift+Cmd+J). Unlike QMK, a
-// same-hand key still held when the term ends gives the hold. No retro-tap: it would hold
-// back the mod after the term, so mod + mouse click would not work.
-#define HRM_COMMON \
+// are set per node below. hold-trigger-on-release (all but the Shift fingers) judges the first
+// key *released* while the mod is undecided, like QMK Chordal Hold on a nested tap: a
+// same-hand key (J, then K tapped) gives taps, while same-side mods still stack (hold D+F, tap
+// J = Shift+Cmd+J). Unlike QMK, a same-hand key still held when the term ends gives the hold.
+// No retro-tap except on the Shift fingers (see hm_l_middle): it holds back the mod after the
+// term, so mod + mouse click would not work.
+#define HRM_BASE \
     compatible = "zmk,behavior-hold-tap"; \
     bindings = <&kp>, <&kp>; \
-    quick-tap-ms = <175>; \
+    quick-tap-ms = <175>;
+#define HRM_COMMON \
+    HRM_BASE \
     hold-trigger-on-release;
 
 #define LINK_MEGA &mega LC(LA(LGUI)) RGUI
@@ -78,10 +84,10 @@
 
 / {
     // QMK-style home row mods. Usage: &hm_<hand>_<finger> <hold keycode> <tap keycode>.
-    // Mirrors the QMK boards' per-finger settings: index and middle 200 ms with permissive
-    // hold (ZMK balanced); ring 300 ms and pinky 400 ms without it (ZMK tap-preferred: hold
-    // only after the term). require-prior-idle-ms is QMK's 150 ms flow tap, left off the middle
-    // (Shift) fingers as in QMK's is_flow_tap_key.
+    // Mirrors the QMK boards' per-finger settings: index 200 ms and middle (Shift) 150 ms with
+    // permissive hold (ZMK balanced); ring 300 ms and pinky 400 ms without it (ZMK
+    // tap-preferred: hold only after the term). require-prior-idle-ms is QMK's 150 ms flow tap,
+    // left off the middle (Shift) fingers as in QMK's is_flow_tap_key.
     behaviors {
         hm_l_pinky: hm_l_pinky {
             HRM_COMMON
@@ -99,12 +105,21 @@
             require-prior-idle-ms = <150>;
             hold-trigger-key-positions = <HRM_TRIGGERS_L>;
         };
+        // Shift fingers: a shorter term so a rolled capital (D released before P) still gives
+        // Shift once D was down 150 ms, and retro-tap so D held alone past the term still types
+        // d (QMK: 150 ms with RETRO_TAPPING). Shift + mouse click needs the plain Shift keys.
+        // No hold-trigger-on-release: they judge the first key *pressed* after them, at every
+        // decision including the 150 ms timer, so a same-hand key other than the index (S in
+        // "ds", E in "de") keeps D a letter even when D comes up after 150 ms; with
+        // hold-trigger-on-release a same-hand key still down at 150 ms would give Shift ("ads"
+        // would type "aS"). Resting on D 150 ms before the next key still gives Shift.
         hm_l_middle: hm_l_middle {
-            HRM_COMMON
+            HRM_BASE
             #binding-cells = <2>;
             flavor = "balanced";
-            tapping-term-ms = <200>;
-            hold-trigger-key-positions = <HRM_TRIGGERS_L>;
+            tapping-term-ms = <150>;
+            retro-tap;
+            hold-trigger-key-positions = <HRM_TRIGGERS_SHIFT_L>;
         };
         hm_l_index: hm_l_index {
             HRM_COMMON
@@ -124,11 +139,12 @@
             hold-trigger-key-positions = <HRM_TRIGGERS_R>;
         };
         hm_r_middle: hm_r_middle {
-            HRM_COMMON
+            HRM_BASE
             #binding-cells = <2>;
             flavor = "balanced";
-            tapping-term-ms = <200>;
-            hold-trigger-key-positions = <HRM_TRIGGERS_R>;
+            tapping-term-ms = <150>;
+            retro-tap;
+            hold-trigger-key-positions = <HRM_TRIGGERS_SHIFT_R>;
         };
         hm_r_ring: hm_r_ring {
             HRM_COMMON
