@@ -65,6 +65,11 @@
 #define LINK_SPC &lt_spc L_NAV SPACE
 #define LINK_BOOT &boot_hold 0 0
 
+// EurKEY characters on NAV (see altgr_tap). A is the only key whose hold differs by OS.
+#define LINK_AE_M &nav_ht LCTRL RA(A)
+#define LINK_AE_W &nav_ht LGUI RA(A)
+#define LINK_SZ &nav_ht LALT RA(S)
+
 // Home row mods and the Esc key on the Caps Lock position. Shared by MAC and WIN where the
 // modifier is the same (S, D, K, L); otherwise _M is MAC (Mac order) and _W is WIN.
 #define LINK_ESC_M &mt LGUI ESC
@@ -196,6 +201,31 @@
             mods = <(MOD_LSFT|MOD_RSFT)>;
         };
 
+        // European characters on NAV, at the QMK Space-layer positions: € on E, ü on U, ö on O,
+        // ä on A, ß on S. The host uses the EurKEY layout on both OSes, where these are AltGr
+        // (Right Alt; Option on macOS) + 5, U, O, A, S, so the same keycodes serve MAC and WIN.
+        // Shift gives the capitals (also ẞ), and Caps Word capitalizes them.
+        // A and S are hold-taps (nav_ht): a tap types ä or ß, a hold is the NAV modifier.
+        // balanced: the modifier needs another key pressed and released while A or S is down
+        // (Space + S + H = Option+Left), or the 200 ms term (mod + mouse click). A roll that
+        // releases A after the next letter is pressed (Bär: A down, R down, A up) still types ä.
+        // A hold-tap sends its tap as press and release back to back, which Windows ignored for
+        // AltGr + letter, so the tap goes through altgr_tap: Right Alt in a report of its own
+        // first, then the key held for the macro tap time, like a real AltGr press.
+        altgr_tap: altgr_tap {
+            compatible = "zmk,behavior-macro-one-param";
+            #binding-cells = <1>;
+            bindings = <&macro_press &kp RALT>, <&macro_param_1to1>,
+                       <&macro_tap &kp MACRO_PLACEHOLDER>, <&macro_release &kp RALT>;
+        };
+        nav_ht: nav_hold_tap {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            bindings = <&kp>, <&altgr_tap>;
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+        };
+
         // Space on tap, NAV on hold. balanced: another key pressed and released while Space is
         // down selects NAV (QMK: LT(layer, KC_SPC) with PERMISSIVE_HOLD). No typing guard and no
         // positional check on Space (QMK marks the thumbs '*'). retro-tap: held alone and
@@ -257,64 +287,66 @@
         // inner keys: Backspace (Shift = Delete) and Space (hold = NAV); then MEGA (holds
         // Ctrl+Option+Cmd, no tap, for workspace switching with the left hand: 1-5, Q-T, A-G,
         // Z-B) and Enter; SYM on both hands; the window overview (Mission Control, Ctrl+Up) and
-        // an unused key; FN on both outer keys. Esc on tap, Cmd on hold left of A. `=` sits
-        // right of P.
+        // Right Option, the EurKEY AltGr (macOS treats both Options alike, so it is Option for
+        // shortcuts as well); FN on both outer keys. Esc on tap, Cmd on hold left of A. `=`
+        // sits right of P.
         mac_layer {
             display-name = "MAC";
 // |      `      |      1      |      2      |      3      |      4      |      5      |                                                                     |      6      |      7      |      8      |      9      |      0      |      -      |
 // |     TAB     |      Q      |      W      |      E      |      R      |      T      |                                                                     |      Y      |      U      |      I      |      O      |      P      |      =      |
 // |  ESC/LGUI   |   A/LCTL    |    S/ALT    |   D/SHIFT   |   F/LGUI    |      G      |                                                                     |      H      |   J/LGUI    |   K/SHIFT   |    L/ALT    |   ;/LCTL    |      '      |
 // |    SHIFT    |      Z      |      X      |      C      |      V      |      B      |    MUTE     |                                         |    PLAY     |      N      |      M      |      ,      |      .      |      /      |    SHIFT    |
-//                             |     FN      | MISSION CTL |     SYM     |    MEGA     |  BKSPC/DEL  |                                         |  SPACE/NAV  |    ENTER    |     SYM     |    NONE     |     FN      |
+//                             |     FN      | MISSION CTL |     SYM     |    MEGA     |  BKSPC/DEL  |                                         |  SPACE/NAV  |    ENTER    |     SYM     |    RALT     |     FN      |
             bindings =
      <&kp GRAVE> ,  <&kp N1>   ,  <&kp N2>   ,  <&kp N3>   ,  <&kp N4>   ,  <&kp N5>   ,                                                                        <&kp N6>   ,  <&kp N7>   ,  <&kp N8>   ,  <&kp N9>   ,  <&kp N0>   , <&kp MINUS> ,
       <&kp TAB>  ,   <&kp Q>   ,   <&kp W>   ,   <&kp E>   ,   <&kp R>   ,   <&kp T>   ,                                                                         <&kp Y>   ,   <&kp U>   ,   <&kp I>   ,   <&kp O>   ,   <&kp P>   , <&kp EQUAL> ,
     <LINK_ESC_M> , <LINK_A_M>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_M>  ,   <&kp G>   ,                                                                         <&kp H>   , <LINK_J_M>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_M> , <&kp APOS>  ,
      <&kp LSHFT> ,   <&kp Z>   ,   <&kp X>   ,   <&kp C>   ,   <&kp V>   ,   <&kp B>   ,<&kp C_MUTE> ,                                           <&kp C_PP>  ,   <&kp N>   ,   <&kp M>   , <&kp COMMA> ,  <&kp DOT>  , <&kp FSLH>  , <&kp RSHFT> ,
-                                 <&mo L_FN>  ,<&kp LC(UP)> , <&mo L_SYM> , <LINK_MEGA> ,  <&bs_del>  ,                                           <LINK_SPC>  ,  <&kp RET>  , <&mo L_SYM> ,   <&none>   , <&mo L_FN>  ;
+                                 <&mo L_FN>  ,<&kp LC(UP)> , <&mo L_SYM> , <LINK_MEGA> ,  <&bs_del>  ,                                           <LINK_SPC>  ,  <&kp RET>  , <&mo L_SYM> , <&kp RALT>  , <&mo L_FN>  ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
 
         // Toggled on top of MAC for Windows/Linux. Only OS-dependent keys are overridden: home
         // row mods in Windows order (GUI, Alt, Shift, Ctrl | Ctrl, Shift, Alt, GUI), Esc/Ctrl
-        // left of A, Task View (Win+Tab) as the window overview, nothing on the MEGA key (no
-        // Windows counterpart yet), and Right Alt (AltGr) on the key that is unused on MAC.
-        // Everything else falls through to MAC.
+        // left of A, Task View (Win+Tab) as the window overview and nothing on the MEGA key (no
+        // Windows counterpart yet). Right Alt (AltGr) comes from MAC. Everything else falls
+        // through to MAC.
         win_layer {
             display-name = "WIN";
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |  ESC/LCTL   |   A/LGUI    |             |             |   F/LCTL    |             |                                                                     |             |   J/LCTL    |             |             |   ;/LGUI    |             |
 // |             |             |             |             |             |             |             |                                         |             |             |             |             |             |             |             |
-//                             |             |  TASK VIEW  |             |    NONE     |             |                                         |             |             |             |    RALT     |             |
+//                             |             |  TASK VIEW  |             |    NONE     |             |                                         |             |             |             |             |             |
             bindings =
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
     <LINK_ESC_W> , <LINK_A_W>  ,  <LINK_S>   ,  <LINK_D>   , <LINK_F_W>  ,  <&trans>   ,                                                                        <&trans>   , <LINK_J_W>  ,  <LINK_K>   ,  <LINK_L>   , <LINK_SC_W> ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-                                  <&trans>   ,<&kp LG(TAB)>,  <&trans>   ,   <&none>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   , <&kp RALT>  ,  <&trans>   ;
+                                  <&trans>   ,<&kp LG(TAB)>,  <&trans>   ,   <&none>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp PG_DN PG_UP>;
         };
 
         // Hold Space. QMK Space layer: arrows on H J K L (Vim order: left, down, up, right),
-        // F1-F12 on the number row (F12 right of P), Delete on Backspace, plus
-        // Home/PgDn/PgUp/End below the arrows in the same order.
-        // The left home row holds plain modifiers in the home row mod order (Ctrl, Option,
-        // Shift, Cmd), without a tapping term: Space + A + H is Ctrl+Left at once, and the same
-        // keys give an instant modifier for mouse clicks or Tab.
+        // F1-F12 on the number row (F12 right of P), Delete on Backspace, € ü ö ä ß on E U O A
+        // S (EurKEY, see altgr_tap), plus Home/PgDn/PgUp/End below the arrows in the same order.
+        // The left home row holds modifiers in the home row mod order (Ctrl, Option, Shift,
+        // Cmd): D and F are plain modifiers without a tapping term (Space + F + H is Cmd+Left at
+        // once, also for mouse clicks or Tab); A and S tap ä and ß and hold Ctrl and Option
+        // (see nav_ht). Shift on D gives the capitals.
         nav_layer {
             display-name = "NAV";
 // |             |     F1      |     F2      |     F3      |     F4      |     F5      |                                                                     |     F6      |     F7      |     F8      |     F9      |     F10     |     F11     |
-// |             |             |             |             |             |             |                                                                     |             |             |             |             |             |     F12     |
-// |             |    LCTL     |     ALT     |    SHIFT    |    LGUI     |             |                                                                     |     <-      |      v      |      ^      |     ->      |             |             |
+// |             |             |             |     EUR     |             |             |                                                                     |             |     UE      |             |     OE      |             |     F12     |
+// |             |   AE/LCTL   |   SS/ALT    |    SHIFT    |    LGUI     |             |                                                                     |     <-      |      v      |      ^      |     ->      |             |             |
 // |             |             |             |             |             |             |             |                                         |             |    HOME     |    PGDN     |    PGUP     |     END     |             |             |
 //                             |             |             |             |             |     DEL     |                                         |             |             |             |             |             |
             bindings =
       <&trans>   ,  <&kp F1>   ,  <&kp F2>   ,  <&kp F3>   ,  <&kp F4>   ,  <&kp F5>   ,                                                                        <&kp F6>   ,  <&kp F7>   ,  <&kp F8>   ,  <&kp F9>   ,  <&kp F10>  ,  <&kp F11>  ,
-      <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&kp F12>  ,
-      <&trans>   , <&kp LCTRL> , <&kp LALT>  , <&kp LSHFT> , <&kp LGUI>  ,  <&trans>   ,                                                                       <&kp LEFT>  , <&kp DOWN>  ,  <&kp UP>   , <&kp RIGHT> ,  <&trans>   ,  <&trans>   ,
+      <&trans>   ,  <&trans>   ,  <&trans>   ,<&kp RA(N5)> ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   , <&kp RA(U)> ,  <&trans>   , <&kp RA(O)> ,  <&trans>   ,  <&kp F12>  ,
+      <&trans>   , <LINK_AE_M> ,  <LINK_SZ>  , <&kp LSHFT> , <&kp LGUI>  ,  <&trans>   ,                                                                       <&kp LEFT>  , <&kp DOWN>  ,  <&kp UP>   , <&kp RIGHT> ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   , <&kp HOME>  , <&kp PGDN>  , <&kp PGUP>  ,  <&kp END>  ,  <&trans>   ,  <&trans>   ,
                                   <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&kp DEL>  ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
 
@@ -322,19 +354,19 @@
         };
 
         // On while WIN and NAV are both on: the NAV modifiers in Windows order (GUI, Alt,
-        // Shift, Ctrl). Only A and F differ from NAV. No sensor-bindings: the encoders fall
-        // through to NAV.
+        // Shift, Ctrl). Only A and F differ from NAV; A still taps ä. No sensor-bindings: the
+        // encoders fall through to NAV.
         nav_win_layer {
             display-name = "NAV WIN";
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
 // |             |             |             |             |             |             |                                                                     |             |             |             |             |             |             |
-// |             |    LGUI     |             |             |    LCTL     |             |                                                                     |             |             |             |             |             |             |
+// |             |   AE/LGUI   |             |             |    LCTL     |             |                                                                     |             |             |             |             |             |             |
 // |             |             |             |             |             |             |             |                                         |             |             |             |             |             |             |             |
 //                             |             |             |             |             |             |                                         |             |             |             |             |             |
             bindings =
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
-      <&trans>   , <&kp LGUI>  ,  <&trans>   ,  <&trans>   , <&kp LCTRL> ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
+      <&trans>   , <LINK_AE_W> ,  <&trans>   ,  <&trans>   , <&kp LCTRL> ,  <&trans>   ,                                                                        <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
       <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,
                                   <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,                                            <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ,  <&trans>   ;
         };

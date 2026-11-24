@@ -31,7 +31,7 @@ XS = tuple(x for row in ROWS for x in row)
 LAYER_NAMES = ("mac_layer", "win_layer", "nav_layer", "nav_win_layer", "sym_layer", "fn_layer")
 # Hold-taps whose two parameters are <hold keycode> <tap keycode>; labelled "TAP/HOLD".
 HOLD_TAPS = ("mt", "hm_l_pinky", "hm_l_ring", "hm_l_middle", "hm_l_index",
-             "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky")
+             "hm_r_index", "hm_r_middle", "hm_r_ring", "hm_r_pinky", "nav_ht")
 ARITY = {"kp": 1, "mo": 1, "to": 1, "tog": 1, "bt": 2, "trans": 0, "none": 0,
          "studio_unlock": 0, "boot_hold": 2, "sys_reset": 0, "sleep_all": 0,
          "lock_mac": 0, "lock_win": 0, "bs_del": 0, "out": 1, "lt_spc": 2,
@@ -58,6 +58,7 @@ KP = {
     "RIGHT": "->", "CAPS": "CAPS", "C_PREV": "PREV", "C_NEXT": "NEXT",
     "PSCRN": "PSCR", "C_BRI_DN": "BRI-", "C_BRI_UP": "BRI+",
     "LC(UP)": "MISSION CTL", "LG(TAB)": "TASK VIEW", "LC(LA(LGUI))": "MEGA",
+    "RA(N5)": "EUR", "RA(U)": "UE", "RA(O)": "OE", "RA(A)": "AE", "RA(S)": "SS",
 }
 Binding = namedtuple("Binding", "alias expr behavior params")
 
